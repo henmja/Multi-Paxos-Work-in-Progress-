@@ -6,22 +6,34 @@ The External clients provide communications between the user interface (javascri
 
 ### Start Paxos nodes (repeat for pitter1, 11 and 19):
 ssh 'USER'@badne7.ux.uis.no
+
 ssh 'USER'@pitter'X'
+
 cd ../lab6
+
 go run start_application
+
 
 ### External Client1
  ssh -vg -L 3333:localhost:6666 'USER'@badne7.ux.uis.no
+ 
  ssh -vg -L 6666:localhost:3389 pitter22
+ 
  cd ../lab6/gorilla/websocket/examples/chat
+ 
  go run .*
+ 
  http://localhost:3333/
  
 ### External Client2:
  ssh -vg -L 3334:localhost:6666 'USER'@badne5.ux.uis.no
+ 
  ssh -vg -L 6666:localhost:3389 pitter15
+ 
  cd ../lab6/gorilla/websocket/examples/chat
+ 
  go run .*
+ 
  http://localhost:3334/
 
 

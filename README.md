@@ -14,7 +14,7 @@ cd ../lab6
 go run start_application
 
 
-### External Client1
+### External Client1:
  ssh -vg -L 3333:localhost:6666 'USER'@badne7.ux.uis.no
  
  ssh -vg -L 6666:localhost:3389 pitter22

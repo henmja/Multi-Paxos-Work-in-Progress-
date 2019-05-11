@@ -1,0 +1,76 @@
+{
+    "localhost": {
+        "nodeIndex": null,
+        "keepalive": true,
+        "timeout": 123,
+        "transport_proto": "tcp",
+        "reconnect_interval": 5, 
+        "nodes": [
+            {
+                "id": 1,
+                "ip": "localhost",
+                "serverPort": 4001,
+                "clientPortMin": 5100,
+                "clientPortMax": 5299
+            },
+            {
+                "id": 2,
+                "ip": "localhost",
+                "serverPort": 4002,
+                "clientPortMin": 5300,
+                "clientPortMax": 5499
+            },
+            {
+                "id": 3,
+                "ip": "localhost",
+                "serverPort": 4003,
+                "clientPortMin": 5500,
+                "clientPortMax": 5699
+            },
+            {
+                "id": 4,
+                "ip": "localhost",
+                "serverPort": 4004,
+                "clientPortMin": 5700,
+                "clientPortMax": 5899
+            }
+        ]
+    },
+    "pitter": {
+        "nodeIndex": null,
+        "keepalive": true,
+        "timeout": 123,
+        "transport_proto": "tcp",
+        "reconnect_interval": 5, 
+        "nodes": [
+            {
+                "id": 1,
+                "ip": "152.94.1.100",
+                "serverPort": 4001,
+                "clientPortMin": 5100,
+                "clientPortMax": 5199
+            },
+            {
+                "id": 2,
+                "ip": "152.94.1.108",
+                "serverPort": 4002,
+                "clientPortMin": 5200,
+                "clientPortMax": 5299
+            },
+            {
+                "id": 3,
+                "ip": "152.94.1.110",
+                "serverPort": 4003,
+                "clientPortMin": 5300,
+                "clientPortMax": 5399
+            },
+            {
+                "id": 4,
+                "ip": "152.94.1.111",
+                "serverPort": 4004,
+                "clientPortMin": 5400,
+                "clientPortMax": 5499
+            }
+        ]
+    }
+}

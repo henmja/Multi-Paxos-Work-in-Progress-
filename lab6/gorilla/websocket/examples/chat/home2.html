@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Chat Example</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+ function show_amount_field() {
+
+	     	// body...
+	     	var transaction_type = document.getElementById("transaction_type").value;
+		    	//var transaction_type = $( "#transaction_type" ).val();
+		    	if (transaction_type == "1" || transaction_type == "2") {
+				    		$("#amount_field").slideDown(1000);
+						    	}
+			    	else{
+					    		$("#amount_field").slideUp(1000);
+							    	}
+				    }
+$(document).ready(function(){
+		        //$("#amount_field").hide();
+		        var transaction_type = document.getElementById("transaction_type").value;
+			    	if (transaction_type == "1" || transaction_type == "2") {
+				    		$("#amount_field").slideDown(1000);
+						    	}
+							    	else{
+								    		$("#amount_field").slideUp();
+										    	}
+											});
+</script>
+<script type="text/javascript">
+window.onload = function () {
+	    var conn;
+	        var msg = document.getElementById("msg");
+		    var log = document.getElementById("log");
+		        //var transaction_type = $( "#transaction_type" ).val();
+		        
+
+		       
+
+		        function appendLog(item) {
+				        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+					        log.appendChild(item);
+						        if (doScroll) {
+								            log.scrollTop = log.scrollHeight - log.clientHeight;
+									            }
+							    }
+
+			    document.getElementById("form").onsubmit = function () {
+				            if (!conn) {
+						                return false;
+								        }
+					            if (!msg.value) {
+							                return false;
+									        }
+						            conn.send(msg.value);
+							            msg.value = "";
+								            return false;
+									        };
+
+			        if (window["WebSocket"]) {
+					        conn = new WebSocket("ws://" + document.location.host + "/ws");
+						        conn.onclose = function (evt) {
+								            var item = document.createElement("div");
+									                item.innerHTML = "<b>Connection closed.</b>";
+											            appendLog(item);
+												            };
+							        conn.onmessage = function (evt) {
+									            var messages = evt.data.split('\n');
+										                for (var i = 0; i < messages.length; i++) {
+													                var item = document.createElement("div");
+															                item.innerText = messages[i];
+																	                appendLog(item);
+																			            }
+												        };
+								    } else {
+									            var item = document.createElement("div");
+										            item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+											            appendLog(item);
+												        }
+};
+</script>
+<style type="text/css">
+html {
+	    overflow: hidden;
+}
+
+body {
+	    overflow: hidden;
+	        padding: 0;
+		    margin: 0;
+		        width: 100%;
+			    height: 100%;
+			        background: gray;
+}
+
+#log {
+	    background: white;
+	        margin: 0;
+		    padding: 0.5em 0.5em 0.5em 0.5em;
+		        /*position: absolute;*/
+		        top: 0.5em;
+			    left: 0.5em;
+			        right: 0.5em;
+				    bottom: 3em;
+				        overflow: auto;
+}
+
+#form {
+	    padding: 0 0.5em 0 0.5em;
+	        margin: 0;
+		    /*position: absolute;
+		        bottom: 1em;*/
+		    left: 0px;
+		        width: 100%;
+			    height: 100%;
+			        /*overflow: hidden;*/
+}
+
+
+#main_container{
+	    overflow: hidden;
+	        padding: 0;
+		    margin: 0;
+		        width: 100%;
+			    height: 100%;
+			        background: gray;
+}
+#container_left{
+	    overflow: hidden;
+	        padding: 0;
+		    margin: 0;
+		        width: 50%;
+			    height: 100%;
+			        float: left;
+				    background: gray;
+}
+#container_right{
+	    overflow: hidden;
+	        padding: 0;
+		    margin: 0;
+		        width: 50%;
+			    float: left;
+			        height: 100%;
+				    background: gray;
+}
+
+
+.input_value_container{
+		width: 100%;
+			height: 20px;
+}
+
+</style>
+</head>
+<body>
+<form id="form">
+		<div id="main_container" >
+					<div id="container_left">
+
+									<div class="input_value_container">
+														<div class="field_container" style="width: 27%;height: 100%;float: left;">
+																				<label for="title">Account number</label>
+																								</div>
+																												
+																												<div class="value_container" style="width: 73%;height: 100%;float: left;">
+																																		<input type="number" name="account_number">
+																																						</div> 
+																																									</div>
+
+																																												<div class="input_value_container" >
+																																																	<div class="field_container" style="width: 27%;height: 100%;float: left;">
+																																																			  				<label for="title">Transaction Type</label>
+																																																								  			</div>
+																																																												  			 
+																																																												  			<div class="value_container" style="width: 73%;height: 100%;float: left;">
+																																																																	  				<select id="transaction_type" onchange="show_amount_field()">
+																																																																							  					<option value="0">Balance</option>
+																																																																													  					<option value="1">Deposit</option>
+																																																																																			  					<option value="2">Withdrawal</option>
+																																																																																													</select>
+																																																																																																	</div>
+																																																																																																				</div>
+
+																																																																																																							<div class="input_value_container">
+																																																																																																												<div id="amount_field" style="display: none;">
+																																																																																																																		<div class="field_container" style="width: 27%;height: 100%;float: left;">
+																																																																																																																									<label for="title"> Amount</label>
+																																																																																																																														</div>
+																																																																																																																																			
+																																																																																																																																			<div class="value_container" style="width: 73%;height: 100%;float: left;">
+																																																																																																																																										<input type="number" name="amount">
+																																																																																																																																															</div> 
+																																																																																																																																																			</div>
+																																																																																																																																																						</div>
+
+																																																																																																																																																									<div class="input_value_container">
+																																																																																																																																																														<div class="field_container" style="width: 27%;height: 100%;float: left;">
+																																																																																																																																																																  				<label for="title">Msg</label>
+																																																																																																																																																																					  			</div>
+																																																																																																																																																																									  			  
+																																																																																																																																																																									  			<div class="value_container" style="width: 73%;height: 100%;float: left;">
+																																																																																																																																																																														  				<input type="text" id="msg" size="10"/> 
+																																																																																																																																																																																			  			</div>
+																																																																																																																																																																																						  			</div>
+
+																																																																																																																																																																																									  			<input type="submit" value="Send">
+																																																																																																																																																																																															
+																																																																																																																																																																																														</div>
+																																																																																																																																																																																																<div id="container_right">
+																																																																																																																																																																																																				<div id="log"></div>
+																																																																																																																																																																																																						</div>
+																																																																																																																																																																																																								
+																																																																																																																																																																																																							</div>
+																																																																																																																																																																																																								
+																																																																																																																																																																																																							 
+																																																																																																																																																																																																						</form>
+																																																																																																																																																																																																						</body>
+																																																																																																																																																																																																						</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Chat Example</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+
+function show_amount_field() {
+	// body...
+	var transaction_type = document.getElementById("transaction_type").value;
+	//var transaction_type = $( "#transaction_type" ).val();
+	if (transaction_type == "1" || transaction_type == "2" || transaction_type == "3") {
+		$("#amount_field").slideDown();
+	}
+	else{
+		$("#amount_field").slideUp();
+	}
+}
+
+
+function show_main_page(){
+	$("#bank_main").slideDown();
+	$("#leader_container").slideDown();
+	$("#login").slideUp();
+	var user_account_number = document.getElementById("user_account_number").value;
+	$("#user_acc_no").text(user_account_number);
+
+}
+function show_login_page(){
+	$("#login").slideDown();
+	$("#bank_main").slideUp();
+	$("#leader_container").slideUp();
+
+}
+$(document).ready(function(){
+
+		//$("#amount_field").hide();
+		var transaction_type = document.getElementById("transaction_type").value;
+		if (transaction_type == "1" || transaction_type == "2" || transaction_type == "3") {
+		$("#amount_field").slideDown();
+		}
+		else{
+		$("#amount_field").slideUp();
+		}
+		});
+
+</script>
+<script type="text/javascript">
+
+var conn;
+var msg ;   
+var log ;
+var transfer_flag = 0;
+//var transaction_type = $( "#transaction_type" ).val();
+
+var account_number;
+var amount;
+var transaction_type ;
+var message_to_send = "";
+var message_to_send2 = "";
+var user_account_number ;
+var seperator = ",";
+var acc_bal = "0";
+//Pad given value to the left with "0"
+function AddZero(num) {
+	    return (num >= 0 && num < 10) ? "0" + num : num + "";
+}
+
+
+window.onload = function () {
+	msg = document.getElementById("msg");   
+	log = document.getElementById("log");
+	transfer_flag = 0;
+	//var transaction_type = $( "#transaction_type" ).val();
+
+
+	function appendLog(item) {
+		var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+		log.appendChild(item);
+		if (doScroll) {
+			log.scrollTop = log.scrollHeight - log.clientHeight;
+		}
+	}
+
+	document.getElementById("form").onsubmit = function () {
+
+		account_number = document.getElementById("account_number").value;
+		//var amount;
+		transaction_type = document.getElementById("transaction_type").value;
+		message_to_send = "";
+		message_to_send2 = "";
+		user_account_number = document.getElementById("user_account_number").value;
+		seperator = ","
+		acc_bal = "0";
+		if (transaction_type == "1" || transaction_type == "2" || transaction_type == "3") {
+			amount = document.getElementById("amount").value;
+		}
+		else {
+			amount = "0";									    		
+		}
+		//message_to_send = message_to_send + account_number + seperator + transaction_type + seperator + amount + seperator + acc_bal;
+		//alert(message_to_send);
+
+		if (!conn) {
+			return false;
+		}
+		/*if (!message_to_send) {
+			return false;
+		}*/
+		/*
+		   conn.send(msg.value);
+		   msg.value = "";*/
+
+
+
+
+		if (transaction_type == "3") {
+
+			message_to_send = message_to_send + user_account_number + seperator + "2" + seperator + amount + seperator + acc_bal;
+			//alert(message_to_send);
+			if (!message_to_send) {
+				return false;
+			}
+			//alert(conn);
+			conn.send(message_to_send);
+			transfer_flag = 1;
+
+
+		/*	message_to_send2 = message_to_send2 + account_number + seperator + "1" + seperator + amount + seperator + acc_bal;
+			//alert(message_to_send2);
+			if (!message_to_send) {
+				return false;
+			}
+			conn.send(message_to_send2);*/
+		}
+		else {
+			message_to_send = message_to_send + account_number + seperator + transaction_type + seperator + amount + seperator + acc_bal;
+			//alert(message_to_send);
+			if (!message_to_send) {
+				return false;
+			}
+			conn.send(message_to_send);
+		}
+
+		message_to_send = "";
+		message_to_send2 = "";
+
+		return false;
+	};
+
+	if (window["WebSocket"]) {
+		conn = new WebSocket("ws://" + document.location.host + "/ws");
+		conn.onclose = function (evt) {
+			var item = document.createElement("div");
+			item.innerHTML = "<b>Connection closed.</b>";
+			appendLog(item);
+		};
+		conn.onmessage = function (evt) {
+			var messages = evt.data.split('\n');
+			var msg_type;
+			var acc_no;
+			var tran_type;
+			var amt;
+			var bal;
+			var split_msg;
+			var leader_ip;
+			var leader_node_id;
+			var final_output_delimiter = " | ";
+			//alert(messages[0]);
+			split_msg =  messages[0].split(",");
+			msg_type = split_msg[0]
+				if(msg_type == "BANK_RESULT") {
+					acc_no =  split_msg[1];
+					tran_type = split_msg[2];
+					if (tran_type == "0"){
+						tran_type = "Balance";
+					}
+					else if (tran_type == "1") {
+						tran_type = "Deposit";
+
+					}
+					else {
+						tran_type = "Withdrawal";
+					}
+					amt = split_msg[3]; 
+					bal = split_msg[4];
+					leader_ip = split_msg[5]; 
+					leader_node_id = split_msg[6];
+
+					var leader_details = "Leader - " + leader_ip + " [ " + leader_node_id + " ] ";
+					//alert(leader_details);
+					$("#leader_container").text(leader_details);
+					var now = new Date();
+					var strDateTime = [[AddZero(now.getDate()), 
+					    AddZero(now.getMonth() + 1), 
+					    now.getFullYear()].join("/"), 
+					    [AddZero(now.getHours()), 
+					    AddZero(now.getMinutes())].join(":"), 
+					    ].join(" ");
+
+					var final_msg = acc_no + final_output_delimiter + tran_type + final_output_delimiter + amt + final_output_delimiter + bal + final_output_delimiter + strDateTime;
+					//alert(final_msg);
+					var item = document.createElement("div");
+					
+					var final_output = " <div class = 'log_container'> <div class = 'account_number_slot'>"+acc_no+"</div> <div class = 'transaction_type_slot'>"+tran_type+"</div> <div class = 'transaction_amount_slot'>"+amt+"</div><div class = 'balance_slot'>"+bal+"</div> <div class = 'time_slot'>"+strDateTime+"</div></div> "
+
+
+					fail_flag = 0;
+
+					$(final_output).appendTo("#log");
+
+					if (transfer_flag == 1) {
+						//alert("transfer flag = 1");
+						//alert(account_number);
+						message_to_send2 = message_to_send2 + account_number + seperator + "1" + seperator + amount + seperator + acc_bal;
+						//alert(message_to_send2);
+						if (!message_to_send2) {
+							return false;
+						}
+						//alert(conn);
+						conn.send(message_to_send2);
+						transfer_flag = 0;
+					}
+					else {
+						ShowSuccessDialog();
+					}
+					//item.innerText = final_msg;
+					//appendLog(item);
+				}
+				if(msg_type == "FAILED") {
+
+					//alert(split_msg[1]);
+					leader_ip = split_msg[2]; 
+					leader_node_id = split_msg[3];
+
+					var leader_details = "Leader - " + leader_ip + " [ " + leader_node_id + " ] ";
+					//alert(leader_details);
+					$("#leader_container").text(leader_details);
+					ShowFailedDialog(split_msg[1]);
+
+				}
+		};
+	} else {
+		var item = document.createElement("div");
+		item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+		appendLog(item);
+	}
+};
+
+
+
+
+
+
+
+function ShowSuccessDialog()
+{
+
+	ShowDialogBox('Warning','Transaction was successfull.','Ok','', 'GoToAssetList',null);
+}
+function ShowFailedDialog(fail_msg)
+{
+	var final_fail_message = "Transaction Failed ...\n[ Reason - "+fail_msg+" ] ";
+
+	ShowDialogBox('Warning',final_fail_message,'Ok','', 'GoToAssetList',null);
+}
+
+function ShowDialogBox(title, content, btn1text, btn2text, functionText, parameterList) {
+	var btn1css;
+	var btn2css;
+
+	if (btn1text == '') {
+		btn1css = "hidecss";
+	} else {
+		btn1css = "showcss";
+	}
+
+	if (btn2text == '') {
+		btn2css = "hidecss";
+	} else {
+		btn2css = "showcss";
+	}
+	$("#lblMessage").html(content);
+
+	$("#dialog").dialog({
+resizable: false,
+title: title,
+modal: true,
+width: '400px',
+height: 'auto',
+bgiframe: false,
+hide: { effect: 'scale', duration: 400 },
+
+buttons: [
+{
+text: btn1text,
+"class": btn1css,
+click: function () {
+
+$("#dialog").dialog('close');
+
+}
+},
+{
+text: btn2text,
+      "class": btn2css,
+      click: function () {
+	      $("#dialog").dialog('close');
+      }
+}
+]
+});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+<style type="text/css">
+html {
+	overflow: hidden;
+}
+
+body {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	background: gray;
+}
+
+#log {
+	/*background: white;*/
+	margin: 0;
+	padding: 0.5em 0.5em 0.5em 0.5em;
+	/*position: absolute;*/
+	top: 0.5em;
+	left: 0.5em;
+	right: 0.5em;
+	bottom: 3em;
+	overflow: auto;
+	border-style: solid;
+	border-width: 2px 0px 0px 0px;
+	border-color: #414e4a;
+}
+
+#form {
+	padding: 0 0.5em 0 0.5em;
+	margin: 0;
+	/*position: absolute;
+	bottom: 1em;*/
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	/*overflow: hidden;*/
+}
+
+
+#main_container{
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	background: gray;
+}
+#container_left{
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	width: 40%;
+	height: 100%;
+	float: left;
+	background: gray;
+	border:solid;
+	border-color: #414e4a;
+	border-radius: 8px;
+}
+#container_right{
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	width: 40%;
+	float: left;
+	height: 100%;
+	background: gray;
+	margin-left:1%;
+	border:solid;
+	border-color: #414e4a;
+	border-radius: 8px;
+}
+
+
+.input_value_container{
+	width: 100%;
+	height: 20px;
+	margin-top:3%;
+}
+
+
+.field_container {
+	width : 51%;
+	height : 100%;
+	float:left;
+	border: solid;
+	border-color: #414e4a;
+	border-width: 0px 0px 0px 0px;
+	text-align:center;
+}
+
+
+.value_container {
+	width : 35%;
+	height : 100%;
+	float:left;
+}
+.log_container{
+	width : 100%;
+	height: 20px;
+	margin-right:-19%;
+}
+
+.account_number_slot{
+	width:19%;
+	height:100%;
+	float:left;
+	border: solid;
+	border-color: #414e4a;
+	text-align: center;
+}
+
+.transaction_type_slot{
+	width:19%;
+	height:100%;
+	float:left;
+	border: solid;
+	border-color: #414e4a;
+	text-align: center;
+}
+
+.transaction_amount_slot{
+	width:19%;
+	height:100%;
+	float:left;
+	border: solid;
+	border-color: #414e4a;
+	text-align: center;
+}
+.balance_slot{
+	width:19%;
+	height:100%;
+	float:left;
+	border: solid;
+	border-color: #414e4a;
+	text-align: center;
+}
+.time_slot{
+	width:19%;
+	height:100%;
+	float:left;
+	border: solid;
+	border-color: #414e4a;
+	text-align: center;
+}
+#leader_container{
+	text-align: center;
+}
+#heading_container{
+	text-align: center;
+}
+#user_account_details{
+	border-color: #414e4a;
+	border-width: 2px 0px 20px 0px;
+	border-style: solid;
+	padding: 0px 0px 6px;
+}
+
+.button {
+	background-color: #3d503d;
+	border: none;
+	color: white;
+	padding: 10px 15px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 11.5px;
+	margin: 4px 2px;
+	border-radius: 8px;
+	cursor: pointer;
+	-webkit-transition-duration: 0.4s; /* Safari */
+	transition-duration: 0.4s;
+}
+
+.button1 {
+	background-color: white; 
+	color: black; 
+	border: 2px solid #3d503d;
+}
+
+.button1:hover {
+	background-color: #3d503d;
+	color: white;
+}
+
+input[type=text], select, textarea {
+	width: 100%;
+	padding: 2px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	resize: vertical;
+}
+
+.showcss{ display:block;}
+.hidecss{ display:none;}
+
+</style>
+</head>
+<body>
+
+<div id = "login" style = "position: absolute; height : 200 px; width 200px; top: 30%; left:39%;">
+
+	<label for="title">Account number</label> <input type="number" name="user_account_number" id="user_account_number">
+	<button type="button" class = "button button1" onclick="show_main_page()">Login</button>
+</div>
+
+<div id = "heading_container" style = " height : 200 px; width 200px; margin-top: 12%; margin-left:-5%;">MULTI PAXOS BANKING SYSTEM</div>
+<div id = "leader_container" style = " height : 200 px; width 200px; margin-top: 3%; margin-left:-5%;"> </div>
+
+<div id = "bank_main" style = "display:none; width 1080px; margin-top: 3%;margin-left:10%;">
+
+
+<form id="form">
+	<div id="main_container" >
+		<div id="container_left">
+
+
+			<div id = "account_heading" style="height:20px;width:100%;padding: 5px 5px 5px; text-align: center;">BANKING SYSTEM</div>
+			<div id = "user_account_details">
+				<div class="input_value_container">
+					<div class="field_container">
+						<label for="title">Welcome</label>
+					</div>
+
+					<div class="value_container">
+						<div id ="user_detail_label" style="width:50%;height:100%;float:left;margin-left:8%;"> 
+							<label for="title" id = "user_acc_no"> </label>
+						</div>
+						<div id ="logout_button" style="width:2%;height:100%;float:left;border-color: #414e4a;border-width: 0px 0px 0px 2px;margin-left:32%;margin-top:-8%;">
+							<button type="button" class= "button button1" onclick="show_login_page()">Logout</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
+			<div id = "Transaction_details">
+				<div class="input_value_container" >
+					<div class="field_container">
+						<label for="title">Request</label>
+					</div>
+
+					<div class="value_container">
+						<select id="transaction_type" onchange="show_amount_field()">
+							<option value="0">Balance</option>
+							<option value="1">Deposit</option>
+							<option value="2">Withdrawal</option>
+							<option value="3">Transfer</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="input_value_container">
+					<div class="field_container">
+						<label for="title">Account number</label>
+					</div>
+
+					<div class="value_container">
+						<input type="number" name="account_number" id="account_number">
+					</div> 
+				</div>
+
+				<div class="input_value_container">
+					<div id="amount_field" style="display: none;">
+						<div class="field_container">
+							<label for="title"> Amount</label>
+						</div>
+
+						<div class="value_container">
+							<input type="number" name="amount" id="amount">
+						</div> 
+					</div>
+				</div>
+
+				<div class="input_value_container">
+					<div id="send_button_container" style="margin-left:84%;">
+
+						<input type="submit" value="Send" class = "button button1">
+
+					</div>
+				</div>
+				</br>
+				</br>
+				</br>
+
+
+			</div>
+
+
+
+
+		</div>
+		<div id="container_right">
+			<div id = "log_heading" style="height:20px;width:100%;padding: 5px 5px 5px; text-align: center; ">TRANSACTION LOGS</div>
+			<div id="log">
+				<div class = "log_container">
+					<div class = "account_number_slot">Account Number</div>
+					<div class = "transaction_type_slot">Request</div>
+					<div class = "transaction_amount_slot">Amount</div>
+					<div class = "balance_slot">Balance</div>
+					<div class = "time_slot">Time</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+</form>
+
+
+<div id="dialog" title="Alert message" style="display: none">
+	<div class="ui-dialog-content ui-widget-content">
+		<p>
+		<span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0"></span>
+		<label id="lblMessage">
+		</label>
+		</p>
+	</div>
+</div>
+
+
+</div>
+
+
+
+
+</body>
+</html>
+
